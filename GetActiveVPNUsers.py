@@ -1,10 +1,12 @@
 import re
 import string
 import os
+import json
+
 ### File Paths
-### Test
 OPENVPNLOG_PATH = '/var/log/openvpn/status.log'
 TMP_FILE_PATH = '/OpenVPNLogging/tmp/tmp.txt'
+IP_LOOKUP_TABLE_PATH = '/OpenVPNLogging/IPLookup/IP_Table.json'
 
 ###Regular Expressiosn
 VPN_IP = re.compile(".*\d+,\d+")
@@ -18,56 +20,111 @@ def main():
     init_directories()
     concat_syslogs()
 
-    sys_log = open(TMP_FILE_PATH, "r")
-    vpn_log = open(OPENVPNLOG_PATH, "r")
+    if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
+        build_IP_lookup_table()
 
-    active, virt = pull_active_user_info(vpn_log)
+    user_data = get_and_match_user_data()
 
-    auth = pull_successful_auth(sys_log)
+def build_IP_lookup_table():
+    lookup = {}
+    ip_table = open(IP_LOOKUP_TABLE_PATH, "w")
 
-    match_logs(auth, active, virt)
+    active = pull_active_IPs()
+    auth = pull_successful_auth()
 
-    sys_log.close()
-    vpn_log.close()
+    for IP in active:
+        lookup[IP] = auth[IP]
 
-def pull_active_user_info(file):
-    user_info = {}
-    virt_IPs = {}
-    for line in file.readlines():
-        if VPN_IP.match(line) is not None:
-            info = line.split(",")
-            user_ip = info[1].split(":")[0]
-            user_info[user_ip] = info
+    json.dump(lookup, ip_table)
 
-        elif VIRTUAL_IP.match(line) is not None:
-            info = line.split(',')
-            user_ip = info[2].split(":")[0]
-            virt_IPs[user_ip] = info[0]
+    ip_table.close()
 
-    return user_info, virt_IPs
+def load_IP_lookup_table():
+    with open(IP_LOOKUP_TABLE_PATH, "r") as file:
+        data = json.load(file)
+        return data
 
-def pull_successful_auth(file):
-    succeded = {}
-    for line in file.readlines():
-        if SUCCEED_AUTH.match(line) is not None:
-            name = NAME.findall(line)
-            ip = IP.findall(line)
-            succeded[ip[0]] = name[0]
-    return succeded
+def get_and_match_user_data():
+    user_list_and_metrics = {}
+    user_info, virt_IPs = pull_active_user_info()
+    table = load_IP_lookup_table()
 
-def match_logs(auth, active, virt):
+    for IP in user_info:
+        if table[IP] is not None:
+            name = table[IP]
+            virt_ip = virt_IPs[IP]
+            data_rec = user_info[IP][2]
+            data_sent = user_info[IP][3]
+            active_time = user_info[IP][4]
+
+            metrics = [name, IP, virt_ip, data_rec, data_sent, active_time]
+
+            user_list_and_metrics[IP] = metrics
+        else:
+            build_IP_lookup_table()
+
+            name = table[IP]
+            virt_ip = virt_IPs[IP]
+            data_rec = user_info[IP][2]
+            data_sent = user_info[IP][3]
+            active_time = user_info[IP][4]
+
+            metrics = [name, IP, virt_ip, data_rec, data_sent, active_time]
+
+            user_list_and_metrics[IP] = metrics
+
+    return user_list_and_metrics
+
+def pull_active_user_info():
+    with open(OPENVPNLOG_PATH, "r") as file:
+
+        user_info = {}
+        virt_IPs = {}
+        for line in file.readlines():
+            if VPN_IP.match(line) is not None:
+                info = line.split(",")
+                user_ip = info[1].split(":")[0]
+                user_info[user_ip] = info
+
+            elif VIRTUAL_IP.match(line) is not None:
+                info = line.split(',')
+                user_ip = info[2].split(":")[0]
+                virt_IPs[user_ip] = info[0]
+
+        return user_info, virt_IPs
+
+def pull_active_IPs():
+    IPs = []
+    with open(OPENVPNLOG_PATH, "r") as file:
+        for line in file.readlines():
+            if VPN_IP.match(line) is not None:
+                info = line.split(",")
+                user_ip = info[1].split(":")[0]
+                IPs.append(user_ip)
+        return IPs
+
+def pull_successful_auth():
+    with open(TMP_FILE_PATH, "r") as file:
+        succeded = {}
+        for line in file.readlines():
+            if SUCCEED_AUTH.match(line) is not None:
+                name = NAME.findall(line)
+                ip = IP.findall(line)
+                succeded[ip[0]] = name[0]
+        return succeded
+
+def print_formated_data(user_data):
     print("\n")
     print("################################################ CONNECTED USERS ################################################")
     print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format('User Name','External IP','Virtual IP', 'Data Recieved (MB)', 'Data Sent (MB)', 'Connected Since: '))
     print("\n")
-    for user in active:
-        username = auth[user]
-        ip = user
-        virt_ip = virt[user]
-        data_rec = active[user][2]
-        data_sent = active[user][3]
-        active_time = active[user][4]
-        print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format(username, ip, virt_ip, float(data_rec)/1000000, float(data_sent)/1000000, active_time))
+    for IP in active:
+        name = user_data[IP][0]
+        virt_ip = user_data[IP][2]
+        data_rec = user_data[IP][3]
+        data_sent = user_data[IP][4]
+        active_time = = user_data[IP][5]
+        print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format(username, IP, virt_ip, float(data_rec)/1000000, float(data_sent)/1000000, active_time))
 
 def concat_syslogs():
     os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip > " + TMP_FILE_PATH)
@@ -76,11 +133,23 @@ def concat_syslogs():
 def init_directories():
     try:
         os.mkdir('/OpenVPNLogging/')
+    except:
+        do = None
+    try:
         os.mkdir('/OpenVPNLogging/tmp/')
     except:
         do = None
     try:
-        file = open('/OpenVPNLogging/tmp/tmp.txt', 'x')
+        os.mkdir('/OpenVPNLogging/IPLookup/')
+    except:
+        do = None
+    try:
+        file = open('IP_LOOKUP_TABLE_PATH', 'x')
+        file.close()
+    except:
+        do = None
+    try:
+        file = open('TMP_FILE_PATH', 'x')
         file.close()
     except:
         do = None
