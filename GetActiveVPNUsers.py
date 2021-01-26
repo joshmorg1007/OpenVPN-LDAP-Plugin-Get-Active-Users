@@ -53,18 +53,20 @@ def get_and_match_user_data():
     table = load_IP_lookup_table()
 
     for IP in user_info:
-        if table[IP] is not None:
-            name = table[IP]
-            virt_ip = virt_IPs[IP]
-            data_rec = user_info[IP][2]
-            data_sent = user_info[IP][3]
-            active_time = user_info[IP][4]
+        try:
+            if table[IP] is not None:
+                name = table[IP]
+                virt_ip = virt_IPs[IP]
+                data_rec = user_info[IP][2]
+                data_sent = user_info[IP][3]
+                active_time = user_info[IP][4]
 
-            metrics = [name, IP, virt_ip, data_rec, data_sent, active_time]
+                metrics = [name, IP, virt_ip, data_rec, data_sent, active_time]
 
-            user_list_and_metrics[IP] = metrics
-        else:
+                user_list_and_metrics[IP] = metrics
+        except:
             build_IP_lookup_table()
+            table  = load_IP_lookup_table()
 
             name = table[IP]
             virt_ip = virt_IPs[IP]
