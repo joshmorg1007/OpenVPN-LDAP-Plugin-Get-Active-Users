@@ -29,13 +29,19 @@ def main():
 
 def build_IP_lookup_table():
     print("Building IP Lookup Table")
-    lookup = {}
+    if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
+        lookup = {}
+
+    else:
+        lookup = load_IP_lookup_table()
+
     ip_table = open(IP_LOOKUP_TABLE_PATH, "w")
 
     active = pull_active_IPs()
     auth = pull_successful_auth()
 
     for IP in active:
+
         lookup[IP] = auth[IP]
 
     json.dump(lookup, ip_table)
@@ -44,7 +50,11 @@ def build_IP_lookup_table():
 
 def load_IP_lookup_table():
     with open(IP_LOOKUP_TABLE_PATH, "r") as file:
-        data = json.load(file)
+
+        try:
+            data = json.load(file)
+        except:
+            data = {}
         return data
 
 def get_and_match_user_data():
