@@ -131,7 +131,7 @@ def pull_successful_auth():
 def print_formated_data(user_data):
     print("\n")
     print("################################################ CONNECTED USERS ################################################")
-    print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format('User Name','External IP','Virtual IP', 'Data Recieved (MB)', 'Data Sent (MB)', 'Connected Since: '))
+    print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format('User Name','External IP','Virtual IP', 'Data Recieved From (MB)', 'Data Sent To (MB)', 'Connected Since: '))
     print("\n")
     for IP in user_data:
         name = user_data[IP][0]
