@@ -25,7 +25,10 @@ def main():
 
     user_data = get_and_match_user_data()
 
+    print_formated_data(user_data)
+
 def build_IP_lookup_table():
+    print("Building IP Lookup Table")
     lookup = {}
     ip_table = open(IP_LOOKUP_TABLE_PATH, "w")
 
@@ -118,13 +121,13 @@ def print_formated_data(user_data):
     print("################################################ CONNECTED USERS ################################################")
     print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format('User Name','External IP','Virtual IP', 'Data Recieved (MB)', 'Data Sent (MB)', 'Connected Since: '))
     print("\n")
-    for IP in active:
+    for IP in user_data:
         name = user_data[IP][0]
         virt_ip = user_data[IP][2]
         data_rec = user_data[IP][3]
         data_sent = user_data[IP][4]
-        active_time = = user_data[IP][5]
-        print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format(username, IP, virt_ip, float(data_rec)/1000000, float(data_sent)/1000000, active_time))
+        active_time = user_data[IP][5]
+        print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format(name, IP, virt_ip, float(data_rec)/1000000, float(data_sent)/1000000, active_time))
 
 def concat_syslogs():
     os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip > " + TMP_FILE_PATH)
