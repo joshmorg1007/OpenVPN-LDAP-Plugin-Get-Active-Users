@@ -130,8 +130,8 @@ def pull_successful_auth():
 
 def print_formated_data(user_data):
     print("\n")
-    print("################################################ CONNECTED USERS ################################################")
-    print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format('User Name','External IP','Virtual IP', 'Data Recieved From (MB)', 'Data Sent To (MB)', 'Connected Since: '))
+    print("################################################### CONNECTED USERS ###################################################")
+    print ("{:<15} {:<18} {:<15} {:<25} {:<17} {:<25}".format('User Name','External IP','Virtual IP', 'Data Recieved From (MB)', 'Data Sent To (MB)', 'Connected Since: '))
     print("\n")
     for IP in user_data:
         name = user_data[IP][0]
@@ -139,7 +139,7 @@ def print_formated_data(user_data):
         data_rec = user_data[IP][3]
         data_sent = user_data[IP][4]
         active_time = user_data[IP][5]
-        print ("{:<15} {:<18} {:<15} {:<20} {:<16} {:<25}".format(name, IP, virt_ip, float(data_rec)/1000000, float(data_sent)/1000000, active_time))
+        print ("{:<15} {:<18} {:<15} {:<25} {:<17} {:<25}".format(name, IP, virt_ip, float(data_rec)/1000000, float(data_sent)/1000000, active_time))
 
 def concat_syslogs():
     os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip > " + TMP_FILE_PATH)
