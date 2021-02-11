@@ -27,6 +27,8 @@ def main():
 
     print_formated_data(user_data)
 
+    purge_lookup_table()
+
 def build_IP_lookup_table():
     print("Building IP Lookup Table")
     if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
@@ -56,6 +58,16 @@ def load_IP_lookup_table():
         except:
             data = {}
         return data
+
+def purge_lookup_table():
+    ip_table = load_IP_lookup_table()
+    reverse = []
+
+    for entry in ip_table.values:
+        if entry in in reverse:
+            os.remote(IP_LOOKUP_TABLE_PATH)
+            build_IP_lookup_table()
+        reverse.append(entry)
 
 def get_and_match_user_data():
     user_list_and_metrics = {}
