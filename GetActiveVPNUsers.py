@@ -64,7 +64,7 @@ def purge_lookup_table():
     reverse = []
 
     for entry in ip_table.values:
-        if entry in in reverse:
+        if entry in reverse:
             os.remote(IP_LOOKUP_TABLE_PATH)
             build_IP_lookup_table()
         reverse.append(entry)
