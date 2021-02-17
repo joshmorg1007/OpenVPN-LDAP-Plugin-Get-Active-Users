@@ -92,7 +92,10 @@ def get_and_match_user_data():
             build_IP_lookup_table()
             table  = load_IP_lookup_table()
 
-            name = table[IP]
+            try:
+                name = table[IP]
+            except:
+                name = "UNIDENTIFIED USER"
             virt_ip = virt_IPs[IP]
             data_rec = user_info[IP][2]
             data_sent = user_info[IP][3]
