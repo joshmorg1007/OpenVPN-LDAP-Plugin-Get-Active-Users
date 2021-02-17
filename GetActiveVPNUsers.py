@@ -98,16 +98,13 @@ def get_and_match_user_data():
                 data_rec = user_info[IP][2]
                 data_sent = user_info[IP][3]
                 active_time = user_info[IP][4]
+
+                metrics = [name, IP, virt_ip, data_rec, data_sent, active_time]
+
+                user_list_and_metrics[IP] = metrics
+
             except:
-                name = ""
-                virt_ip = ""
-                data_rec = 0
-                data_sent = 0
-                active_time = ""
-
-            metrics = [name, IP, virt_ip, data_rec, data_sent, active_time]
-
-            user_list_and_metrics[IP] = metrics
+                print("Issue with IP: " + IP)
 
     return user_list_and_metrics
 
