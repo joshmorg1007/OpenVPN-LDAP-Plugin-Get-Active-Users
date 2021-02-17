@@ -44,8 +44,10 @@ def build_IP_lookup_table():
 
     for IP in active:
 
-        lookup[IP] = auth[IP]
-
+        try:
+            lookup[IP] = auth[IP]
+        except:
+            print("No name matching: " + str(IP) + " in LDAP logs")
     json.dump(lookup, ip_table)
 
     ip_table.close()
