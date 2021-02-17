@@ -94,12 +94,16 @@ def get_and_match_user_data():
 
             try:
                 name = table[IP]
+                virt_ip = virt_IPs[IP]
+                data_rec = user_info[IP][2]
+                data_sent = user_info[IP][3]
+                active_time = user_info[IP][4]
             except:
-                name = "UNIDENTIFIED USER"
-            virt_ip = virt_IPs[IP]
-            data_rec = user_info[IP][2]
-            data_sent = user_info[IP][3]
-            active_time = user_info[IP][4]
+                name = ""
+                virt_ip = ""
+                data_rec = ""
+                data_sent = ""
+                active_time = ""
 
             metrics = [name, IP, virt_ip, data_rec, data_sent, active_time]
 
