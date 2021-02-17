@@ -101,8 +101,8 @@ def get_and_match_user_data():
             except:
                 name = ""
                 virt_ip = ""
-                data_rec = ""
-                data_sent = ""
+                data_rec = 0
+                data_sent = 0
                 active_time = ""
 
             metrics = [name, IP, virt_ip, data_rec, data_sent, active_time]
