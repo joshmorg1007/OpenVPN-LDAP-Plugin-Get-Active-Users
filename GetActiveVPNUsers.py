@@ -30,6 +30,7 @@ def main():
     purge_lookup_table()
 
 def build_IP_lookup_table():
+    """Builds IP Lookup table JSON file through matching entries in status.log successful LDAP authentications in syslog """
     print("Building IP Lookup Table")
     if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
         lookup = {}
@@ -53,6 +54,7 @@ def build_IP_lookup_table():
     ip_table.close()
 
 def load_IP_lookup_table():
+    """loads IP Lookup JSON file to a python dictionary"""
     with open(IP_LOOKUP_TABLE_PATH, "r") as file:
 
         try:
@@ -62,6 +64,7 @@ def load_IP_lookup_table():
         return data
 
 def purge_lookup_table():
+    """Removes duplicate entries for users that have connected with different IPs"""
     ip_table = load_IP_lookup_table()
     reverse = []
 
@@ -72,6 +75,7 @@ def purge_lookup_table():
         reverse.append(entry)
 
 def get_and_match_user_data():
+    """matches current info in status.log with IP Lookup table"""
     user_list_and_metrics = {}
     user_info, virt_IPs = pull_active_user_info()
     table = load_IP_lookup_table()
@@ -109,6 +113,7 @@ def get_and_match_user_data():
     return user_list_and_metrics
 
 def pull_active_user_info():
+    """ Parses through status.log for current connection information"""
     with open(OPENVPNLOG_PATH, "r") as file:
 
         user_info = {}
@@ -127,6 +132,7 @@ def pull_active_user_info():
         return user_info, virt_IPs
 
 def pull_active_IPs():
+    """ Parses through status.log for active IPs"""
     IPs = []
     with open(OPENVPNLOG_PATH, "r") as file:
         for line in file.readlines():
@@ -137,6 +143,7 @@ def pull_active_IPs():
         return IPs
 
 def pull_successful_auth():
+    """ Parses through concatinated syslog for successful LDAP authentications"""
     with open(TMP_FILE_PATH, "r") as file:
         succeded = {}
         for line in file.readlines():
@@ -160,10 +167,12 @@ def print_formated_data(user_data):
         print ("{:<15} {:<18} {:<15} {:<25} {:<17} {:<25}".format(name, IP, virt_ip, float(data_rec)/1000000, float(data_sent)/1000000, active_time))
 
 def concat_syslogs():
+    """Concatinates all syslog files into one temp file"""
     os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip > " + TMP_FILE_PATH)
     os.system("/bin/cat /var/log/syslog.1 /var/log/syslog >> " + TMP_FILE_PATH)
 
 def init_directories():
+    """Initialized the directories and files """
     try:
         os.mkdir('/OpenVPNLogging/')
     except:
@@ -177,12 +186,12 @@ def init_directories():
     except:
         do = None
     try:
-        file = open('IP_LOOKUP_TABLE_PATH', 'x')
+        file = open(IP_LOOKUP_TABLE_PATH, 'x')
         file.close()
     except:
         do = None
     try:
-        file = open('TMP_FILE_PATH', 'x')
+        file = open(TMP_FILE_PATH, 'x')
         file.close()
     except:
         do = None
